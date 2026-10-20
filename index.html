@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollar Printer | Demo Trading</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b10;color:#f4f6fa;font-family:Arial,sans-serif}
+header{padding:18px 15px;border-bottom:1px solid #252b35;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:20px;font-weight:bold;color:#fff}
+.logo span{color:#22c987}
+.demo{font-size:11px;color:#22c987;border:1px solid #22c987;padding:6px 9px;border-radius:7px}
+main{padding:15px;max-width:850px;margin:auto}
+.balance{background:#121822;border:1px solid #29313d;border-radius:13px;padding:17px;margin-bottom:16px}
+.small{color:#9aa5b5;font-size:13px}
+.money{font-size:30px;font-weight:bold;margin:9px 0}
+.green{color:#22d18b}
+.red{color:#ff5364}
+.toolbar{display:flex;gap:8px;margin-bottom:12px}
+select,input,button{font:inherit;border-radius:8px;padding:11px;background:#151c27;color:white;border:1px solid #303a49}
+select{flex:1;min-width:0}
+.chartbox{background:#101620;border:1px solid #273140;border-radius:12px;padding:10px}
+.charttop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+canvas{width:100%;height:270px;display:block}
+.prices{display:flex;justify-content:space-between;padding:13px 2px}
+.trade{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}
+.trade button{font-size:17px;font-weight:bold;padding:15px;border:0}
+.buy{background:#13a873}
+.sell{background:#e84455}
+.trade button:active{opacity:.75}
+.panel{background:#111721;border:1px solid #28313e;border-radius:12px;padding:14px;margin-top:15px}
+h3{margin:0 0 13px;font-size:17px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1;font-size:13px;padding:10px}
+.tabs .active{border-color:#22c987;color:#22c987}
+.item{padding:12px 0;border-top:1px solid #28313e;font-size:13px;display:flex;justify-content:space-between;gap:10px}
+.note{font-size:12px;color:#8f9bad;line-height:1.6}
+footer{text-align:center;padding:24px;color:#697587;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">DOLLAR <span>PRINTER</span></div>
+ <div class="demo">DEMO ACCOUNT</div>
+</header>
+<main>
+ <div class="balance">
+  <div class="small">Demo account balance (USD)</div>
+  <div class="money" id="balance">$10,000.00</div>
+  <div class="small">Available demo funds · Simulated trading only</div>
+ </div>
+
+ <div class="toolbar">
+  <select id="symbol" aria-label="Trading symbol">
+   <option>EUR/USD</option><option>GBP/USD</option>
+   <option>USD/JPY</option><option>BTC/USD</option>
+   <option>GOLD</option>
+  </select>
+  <select id="period" aria-label="Chart timeframe">
+   <option value="1">1m</option><option value="5">5m</option>
+   <option value="15">15m</option>
+  </select>
+ </div>
+
+ <div class="chartbox">
+  <div class="charttop">
+   <strong id="chartname">EUR/USD</strong>
+   <span class="green" id="price">1.08500</span>
+  </div>
+  <canvas id="chart"></canvas>
+  <div class="prices">
+   <div><div class="small">Bid (demo)</div><b id="bid">1.08490</b></div>
+   <div style="text-align:right"><div class="small">Ask (demo)</div><b id="ask">1.08510</b></div>
+  </div>
+  <div class="note">Illustrative demo prices — not live market quotes.</div>
+ </div>
+
+ <div class="panel">
+  <h3>Place a demo trade</h3>
+  <div class="toolbar">
+   <input id="amount" type="number" min="1" max="10000" value="100" aria-label="Trade amount" style="width:100%">
+  </div>
+  <div class="small">Trade amount (USD)</div>
+  <div class="trade">
+   <button class="buy" onclick="trade('BUY')">BUY ↑</button>
+   <button class="sell" onclick="trade('SELL')">SELL ↓</button>
+  </div>
+  <div class="note">Demo trades only. No real money or broker is connected. Positions are illustrative and do not guarantee profit.</div>
+ </div>
+
+ <div class="panel">
+  <div class="tabs">
+   <button id="positionsTab" class="active" onclick="showTab('positions')">Positions</button>
+   <button id="historyTab" onclick="showTab('history')">History</button>
+  </div>
+  <div id="tradeList"><div class="note">No open positions yet. Place a demo trade to begin.</div></div>
+ </div>
+</main>
+<footer> DOLLAR PRINTER · DEMO MODE · Practice responsibly </footer>
+
+<script>
+let balance=10000;
+let positions=[];
+let history=[];
+let prices={
+ "EUR/USD":1.08500,"GBP/USD":1.27000,
+ "USD/JPY":149.500,"BTC/USD":67000,"GOLD":2650
+};
+let currentTab="positions";
+let candles=[];
+let seed=0;
+
+function money(n){
+ return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmt(n){
+ return n.toFixed(prices[document.getElementById("symbol").value]<10?5:2);
+}
+function makeCandles(){
+ let p=prices[document.getElementById("symbol").value];
+ candles=[];
+ for(let i=0;i<38;i++){
+  let o=p;
+  let c=o+(Math.random()-.5)*p*.002;
+  candles.push({o,h:Math.max(o,c)+Math.random()*p*.0005,
+   l:Math.min(o,c)-Math.random()*p*.0005,c});
+  p=c;
+ }
+ prices[document.getElementById("symbol").value]=p;
+}
+function draw(){
+ const canvas=document.getElementById("chart");
+ const rect=canvas.getBoundingClientRect();
+ const dpr=window.devicePixelRatio||1;
+ canvas.width=rect.width*dpr;
+ canvas.height=rect.height*dpr;
+ const ctx=canvas.getContext("2d");
+ ctx.scale(dpr,dpr);
+ const w=rect.width,h=rect.height;
+ ctx.clearRect(0,0,w,h);
+ for(let i=0;i<5;i++){
+  let y=i*h/4;
+  ctx.strokeStyle="#273140";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+ }
+ let lo=Math.min(...candles.map(c=>c.l));
+ let hi=Math.max(...candles.map(c=>c.h));
+ let pad=(hi-lo)*.12||.001;lo-=pad;hi+=pad;
+ const y=v=>h-((v-lo)/(hi-lo))*h;
+ let cw=w/candles.length;
+ candles.forEach((c,i)=>{
+  let x=i*cw+cw*.5;
+  let up=c.c>=c.o;
+  ctx.strokeStyle=up?"#22d18b":"#ff5364";
+  ctx.fillStyle=ctx.strokeStyle;
+  ctx.beginPath();ctx.moveTo(x,y(c.h));ctx.lineTo(x,y(c.l));ctx.stroke();
+  let top=y(Math.max(c.o,c.c)),bottom=y(Math.min(c.o,c.c));
+  ctx.fillRect(x-cw*.29,top,Math.max(2,cw*.58),Math.max(1,bottom-top));
+ });
+}
+function updatePrice(){
+ let s=document.getElementById("symbol").value;
+ let p=prices[s];
+ p+=(Math.random()-.5)*p*.00015;
+ prices[s]=p;
+ if(candles.length){
+  let c=candles[candles.length-1];
+  c.c=p;c.h=Math.max(c.h,p);c.l=Math.min(c.l,p);
+ }
+ document.getElementById("chartname").textContent=s;
+ document.getElementById("price").textContent=fmt(p);
+ document.getElementById("bid").textContent=fmt(p-p*.00005);
+ document.getElementById("ask").textContent=fmt(p+p*.00005);
+ draw();
+}
+function trade(side){
+ let s=document.getElementById("symbol").value;
+ let amount=Number(document.getElementById("amount").value);
+ if(!Number.isFinite(amount)||amount<1||amount>balance){
+  alert("Enter a valid amount within your demo balance.");return;
+ }
+ balance-=amount;
+ let item={id:Date.now(),symbol:s,side,amount,entry:prices[s],time:new Date().toLocaleTimeString()};
+ positions.unshift(item);
+ history.unshift({...item,status:"OPEN",exit:null,pnl:0});
+ document.getElementById("balance").textContent=money(balance);
+ render();
+}
+function closePosition(id){
+ let i=positions.findIndex(p=>p.id===id);
+ if(i<0)return;
+ let p=positions[i],exit=prices[p.symbol];
+ let pnl=(p.side==="BUY"?exit-p.entry:p.entry-exit)/p.entry*p.amount;
+ balance+=p.amount+pnl;
+ let h=history.find(x=>x.id===id);
+ if(h){h.exit=exit;h.pnl=pnl;h.status="CLOSED";}
+ positions.splice(i,1);
+ document.getElementById("balance").textContent=money(balance);
+ render();
+}
+function showTab(tab){
+ currentTab=tab;
+ document.getElementById("positionsTab").classList.toggle("active",tab==="positions");
+ document.getElementById("historyTab").classList.toggle("active",tab==="history");
+ render();
+}
+function render(){
+ let list=document.getElementById("tradeList");
+ let arr=currentTab==="positions"?positions:history;
+ if(!arr.length){
+  list.innerHTML='<div class="note">Nothing to show yet.</div>';return;
+ }
+ list.innerHTML=arr.map(p=>{
+  let pnl=p.pnl||0;
+  return '<div class="item"><div><b>'+p.side+' · '+p.symbol+'</b><br><span class="small">'+p.time+' · '+money(p.amount)+'</span>'+
+  (currentTab==="history"?'<br><span class="'+(pnl>=0?'green':'red')+'">'+p.status+(p.status==="CLOSED"?' · '+money(pnl):'')+'</span>':'')+
+  '</div><div style="text-align:right">'+
+  (currentTab==="positions"?'<button onclick="closePosition('+p.id+')" style="padding:7px">Close</button>':'<span class="small">'+(p.exit===null?'Open':'Exit '+fmt(p.exit))+'</span>')+
+  '</div></div>';
+ }).join("");
+}
+document.getElementById("symbol").addEventListener("change",()=>{
+ makeCandles();updatePrice();
+});
+document.getElementById("period").addEventListener("change",()=>{
+ makeCandles();draw();
+});
+window.addEventListener("resize",draw);
+makeCandles();updatePrice();
+setInterval(updatePrice,1500);
+</script>
+</body>
+     </html>
+  
