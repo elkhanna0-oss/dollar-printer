@@ -3,234 +3,268 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dollar Printer | Demo Trading</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOLLAR PRINTER</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#080b10;color:#f4f6fa;font-family:Arial,sans-serif}
-header{padding:18px 15px;border-bottom:1px solid #252b35;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:20px;font-weight:bold;color:#fff}
-.logo span{color:#22c987}
-.demo{font-size:11px;color:#22c987;border:1px solid #22c987;padding:6px 9px;border-radius:7px}
-main{padding:15px;max-width:850px;margin:auto}
-.balance{background:#121822;border:1px solid #29313d;border-radius:13px;padding:17px;margin-bottom:16px}
-.small{color:#9aa5b5;font-size:13px}
-.money{font-size:30px;font-weight:bold;margin:9px 0}
-.green{color:#22d18b}
-.red{color:#ff5364}
-.toolbar{display:flex;gap:8px;margin-bottom:12px}
-select,input,button{font:inherit;border-radius:8px;padding:11px;background:#151c27;color:white;border:1px solid #303a49}
-select{flex:1;min-width:0}
-.chartbox{background:#101620;border:1px solid #273140;border-radius:12px;padding:10px}
-.charttop{display:flex;justify-content:space-between;align-items:center;gap:8px}
-canvas{width:100%;height:270px;display:block}
-.prices{display:flex;justify-content:space-between;padding:13px 2px}
-.trade{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}
-.trade button{font-size:17px;font-weight:bold;padding:15px;border:0}
-.buy{background:#13a873}
-.sell{background:#e84455}
-.trade button:active{opacity:.75}
-.panel{background:#111721;border:1px solid #28313e;border-radius:12px;padding:14px;margin-top:15px}
-h3{margin:0 0 13px;font-size:17px}
+header{padding:18px 14px;background:#10151e;border-bottom:1px solid #29313e;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:20px;font-weight:900;letter-spacing:1px}
+.brand span{color:#18d69a}
+.demo{font-size:11px;color:#18d69a;border:1px solid #18d69a;padding:5px 8px;border-radius:5px}
+main{padding:12px;max-width:850px;margin:auto}
+.panel{background:#111720;border:1px solid #26303c;border-radius:10px;padding:13px;margin-bottom:12px}
+.muted{color:#98a5b6;font-size:12px}
+.balance{font-size:27px;font-weight:bold;margin-top:6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+select,input,button{background:#1b2430;color:white;border:1px solid #364353;border-radius:6px;padding:10px;font-size:14px}
+button{cursor:pointer}
+button:active{opacity:.7}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.tools button{padding:7px 11px;font-size:12px}
+.tools button.active{border-color:#18d69a;color:#18d69a}
+#chart{width:100%;height:270px;display:block;background:#0b1017;border-radius:6px}
+.price{font-size:22px;font-weight:bold}
+.green{color:#18d69a}
+.red{color:#ff5265}
+label{display:block;color:#98a5b6;font-size:12px;margin:12px 0 6px}
+input,select{width:100%}
+.tradebuttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tradebuttons button{font-size:16px;font-weight:bold;padding:15px;border:0}
+.buy{background:#087f60}
+.sell{background:#c52f45}
 .tabs{display:flex;gap:8px;margin-bottom:12px}
-.tabs button{flex:1;font-size:13px;padding:10px}
-.tabs .active{border-color:#22c987;color:#22c987}
-.item{padding:12px 0;border-top:1px solid #28313e;font-size:13px;display:flex;justify-content:space-between;gap:10px}
-.note{font-size:12px;color:#8f9bad;line-height:1.6}
-footer{text-align:center;padding:24px;color:#697587;font-size:12px}
+.tabs button{flex:1;font-size:12px}
+.item{padding:10px 0;border-bottom:1px solid #29313e;font-size:13px}
+.item:last-child{border:0}
+footer{text-align:center;color:#8490a0;font-size:11px;padding:18px}
 </style>
 </head>
 <body>
 <header>
- <div class="logo">DOLLAR <span>PRINTER</span></div>
- <div class="demo">DEMO ACCOUNT</div>
+<div class="brand">DOLLAR <span>PRINTER</span></div>
+<div class="demo">DEMO ACCOUNT</div>
 </header>
 <main>
- <div class="balance">
-  <div class="small">Demo account balance (USD)</div>
-  <div class="money" id="balance">$10,000.00</div>
-  <div class="small">Available demo funds · Simulated trading only</div>
- </div>
+<section class="panel">
+<div class="row">
+<div>
+<div class="muted">DEMO BALANCE (USD)</div>
+<div class="balance" id="balance">$1,000.00</div>
+</div>
+<button onclick="resetDemo()">Reset</button>
+</div>
+</section>
 
- <div class="toolbar">
-  <select id="symbol" aria-label="Trading symbol">
-   <option>EUR/USD</option><option>GBP/USD</option>
-   <option>USD/JPY</option><option>BTC/USD</option>
-   <option>GOLD</option>
-  </select>
-  <select id="period" aria-label="Chart timeframe">
-   <option value="1">1m</option><option value="5">5m</option>
-   <option value="15">15m</option>
-  </select>
- </div>
+<section class="panel">
+<div class="row">
+<select id="symbol" onchange="newMarket()">
+<option>EUR/USD</option>
+<option>GBP/USD</option>
+<option>USD/JPY</option>
+<option>XAU/USD</option>
+<option>BTC/USD</option>
+</select>
+<div>
+<div class="muted">SIMULATED PRICE</div>
+<div class="price" id="price">1.08500</div>
+</div>
+</div>
+<div class="tools">
+<button class="active" onclick="setTF('M1',this)">M1</button>
+<button onclick="setTF('M5',this)">M5</button>
+<button onclick="setTF('M15',this)">M15</button>
+<button onclick="setTF('M30',this)">M30</button>
+<button onclick="setTF('H1',this)">H1</button>
+</div>
+<canvas id="chart"></canvas>
+<div class="muted" style="margin-top:9px">Illustrative demo chart. Prices are simulated, not live market quotes.</div>
+</section>
 
- <div class="chartbox">
-  <div class="charttop">
-   <strong id="chartname">EUR/USD</strong>
-   <span class="green" id="price">1.08500</span>
-  </div>
-  <canvas id="chart"></canvas>
-  <div class="prices">
-   <div><div class="small">Bid (demo)</div><b id="bid">1.08490</b></div>
-   <div style="text-align:right"><div class="small">Ask (demo)</div><b id="ask">1.08510</b></div>
-  </div>
-  <div class="note">Illustrative demo prices — not live market quotes.</div>
- </div>
+<section class="panel">
+<div class="row"><strong>Place Demo Trade</strong><span class="muted">BUY / SELL</span></div>
+<label for="amount">Trade amount (USD)</label>
+<input id="amount" type="number" min="1" step="1" value="10">
+<div class="tradebuttons">
+<button class="buy" onclick="trade('BUY')">BUY ▲</button>
+<button class="sell" onclick="trade('SELL')">SELL ▼</button>
+</div>
+<div class="muted" id="message" style="margin-top:10px">Demo trading only. No real money is used.</div>
+</section>
 
- <div class="panel">
-  <h3>Place a demo trade</h3>
-  <div class="toolbar">
-   <input id="amount" type="number" min="1" max="10000" value="100" aria-label="Trade amount" style="width:100%">
-  </div>
-  <div class="small">Trade amount (USD)</div>
-  <div class="trade">
-   <button class="buy" onclick="trade('BUY')">BUY ↑</button>
-   <button class="sell" onclick="trade('SELL')">SELL ↓</button>
-  </div>
-  <div class="note">Demo trades only. No real money or broker is connected. Positions are illustrative and do not guarantee profit.</div>
- </div>
-
- <div class="panel">
-  <div class="tabs">
-   <button id="positionsTab" class="active" onclick="showTab('positions')">Positions</button>
-   <button id="historyTab" onclick="showTab('history')">History</button>
-  </div>
-  <div id="tradeList"><div class="note">No open positions yet. Place a demo trade to begin.</div></div>
- </div>
+<section class="panel">
+<div class="tabs">
+<button onclick="showTab('positions')">Open Positions</button>
+<button onclick="showTab('history')">History</button>
+</div>
+<div id="list"></div>
+</section>
 </main>
-<footer> DOLLAR PRINTER · DEMO MODE · Practice responsibly </footer>
+<footer>DOLLAR PRINTER · DEMO MODE · No real-money execution</footer>
 
 <script>
-let balance=10000;
+let balance=1000;
 let positions=[];
 let history=[];
+let currentTF='M1';
+let tab='positions';
+let seq=0;
 let prices={
- "EUR/USD":1.08500,"GBP/USD":1.27000,
- "USD/JPY":149.500,"BTC/USD":67000,"GOLD":2650
+'EUR/USD':1.08500,
+'GBP/USD':1.27100,
+'USD/JPY':149.500,
+'XAU/USD':2700.00,
+'BTC/USD':67000.00
 };
-let currentTab="positions";
+let price=prices['EUR/USD'];
 let candles=[];
-let seed=0;
 
-function money(n){
- return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-}
 function fmt(n){
- return n.toFixed(prices[document.getElementById("symbol").value]<10?5:2);
+ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function decimals(){
+ return document.getElementById('symbol').value==='USD/JPY'?3:
+ document.getElementById('symbol').value==='XAU/USD'?2:
+ document.getElementById('symbol').value==='BTC/USD'?2:5;
 }
 function makeCandles(){
- let p=prices[document.getElementById("symbol").value];
  candles=[];
- for(let i=0;i<38;i++){
-  let o=p;
-  let c=o+(Math.random()-.5)*p*.002;
-  candles.push({o,h:Math.max(o,c)+Math.random()*p*.0005,
-   l:Math.min(o,c)-Math.random()*p*.0005,c});
-  p=c;
+ let p=price;
+ for(let i=0;i<45;i++){
+  let open=p;
+  let change=(Math.random()-.49)*p*.0018;
+  let close=open+change;
+  candles.push({
+   open,close,
+   high:Math.max(open,close)+Math.random()*p*.0005,
+   low:Math.min(open,close)-Math.random()*p*.0005
+  });
+  p=close;
  }
- prices[document.getElementById("symbol").value]=p;
+ price=p;
+}
+function newMarket(){
+ price=prices[document.getElementById('symbol').value];
+ makeCandles(); update(); draw();
+}
+function setTF(tf,btn){
+ currentTF=tf;
+ document.querySelectorAll('.tools button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ makeCandles();update();draw();
+}
+function update(){
+ document.getElementById('balance').textContent='$'+fmt(balance);
+ document.getElementById('price').textContent=price.toFixed(decimals());
+ renderList();
 }
 function draw(){
- const canvas=document.getElementById("chart");
+ const canvas=document.getElementById('chart');
  const rect=canvas.getBoundingClientRect();
+ if(!rect.width)return;
  const dpr=window.devicePixelRatio||1;
  canvas.width=rect.width*dpr;
- canvas.height=rect.height*dpr;
- const ctx=canvas.getContext("2d");
+ canvas.height=270*dpr;
+ const ctx=canvas.getContext('2d');
  ctx.scale(dpr,dpr);
- const w=rect.width,h=rect.height;
- ctx.clearRect(0,0,w,h);
+ const w=rect.width,h=270;
+ ctx.fillStyle='#0b1017';ctx.fillRect(0,0,w,h);
+ let min=Math.min(...candles.map(c=>c.low));
+ let max=Math.max(...candles.map(c=>c.high));
+ let pad=(max-min)*.12||.01;min-=pad;max+=pad;
+ const y=v=>h-20-(v-min)/(max-min)*(h-40);
+ ctx.font='10px Arial';
  for(let i=0;i<5;i++){
-  let y=i*h/4;
-  ctx.strokeStyle="#273140";ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+  let yy=20+i*(h-40)/4;
+  ctx.strokeStyle='#202a36';ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(w,yy);ctx.stroke();
+  let val=max-i*(max-min)/4;
+  ctx.fillStyle='#8190a2';
+  ctx.fillText(val.toFixed(decimals()),5,yy-4);
  }
- let lo=Math.min(...candles.map(c=>c.l));
- let hi=Math.max(...candles.map(c=>c.h));
- let pad=(hi-lo)*.12||.001;lo-=pad;hi+=pad;
- const y=v=>h-((v-lo)/(hi-lo))*h;
- let cw=w/candles.length;
+ const left=62, right=8, usable=w-left-right;
+ const step=usable/candles.length;
  candles.forEach((c,i)=>{
-  let x=i*cw+cw*.5;
-  let up=c.c>=c.o;
-  ctx.strokeStyle=up?"#22d18b":"#ff5364";
-  ctx.fillStyle=ctx.strokeStyle;
-  ctx.beginPath();ctx.moveTo(x,y(c.h));ctx.lineTo(x,y(c.l));ctx.stroke();
-  let top=y(Math.max(c.o,c.c)),bottom=y(Math.min(c.o,c.c));
-  ctx.fillRect(x-cw*.29,top,Math.max(2,cw*.58),Math.max(1,bottom-top));
+  const x=left+i*step+step/2;
+  const up=c.close>=c.open;
+  const color=up?'#18d69a':'#ff5265';
+  ctx.strokeStyle=color;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x,y(c.high));ctx.lineTo(x,y(c.low));ctx.stroke();
+  ctx.fillStyle=color;
+  const top=Math.min(y(c.open),y(c.close));
+  const bh=Math.max(2,Math.abs(y(c.open)-y(c.close)));
+  ctx.fillRect(x-step*.29,top,Math.max(2,step*.58),bh);
  });
-}
-function updatePrice(){
- let s=document.getElementById("symbol").value;
- let p=prices[s];
- p+=(Math.random()-.5)*p*.00015;
- prices[s]=p;
- if(candles.length){
-  let c=candles[candles.length-1];
-  c.c=p;c.h=Math.max(c.h,p);c.l=Math.min(c.l,p);
- }
- document.getElementById("chartname").textContent=s;
- document.getElementById("price").textContent=fmt(p);
- document.getElementById("bid").textContent=fmt(p-p*.00005);
- document.getElementById("ask").textContent=fmt(p+p*.00005);
- draw();
+ ctx.strokeStyle='#e9edf5';ctx.setLineDash([4,3]);
+ ctx.beginPath();ctx.moveTo(left,y(price));ctx.lineTo(w,y(price));ctx.stroke();
+ ctx.setLineDash([]);
 }
 function trade(side){
- let s=document.getElementById("symbol").value;
- let amount=Number(document.getElementById("amount").value);
- if(!Number.isFinite(amount)||amount<1||amount>balance){
-  alert("Enter a valid amount within your demo balance.");return;
+ const amount=Number(document.getElementById('amount').value);
+ const message=document.getElementById('message');
+ if(!Number.isFinite(amount)||amount<1){
+  message.textContent='Enter a trade amount of at least $1.';return;
+ }
+ if(amount>balance){
+  message.textContent='Insufficient demo balance.';return;
  }
  balance-=amount;
- let item={id:Date.now(),symbol:s,side,amount,entry:prices[s],time:new Date().toLocaleTimeString()};
- positions.unshift(item);
- history.unshift({...item,status:"OPEN",exit:null,pnl:0});
- document.getElementById("balance").textContent=money(balance);
- render();
+ positions.unshift({
+  id:++seq,side,amount,
+  symbol:document.getElementById('symbol').value,
+  entry:price,opened:new Date().toLocaleTimeString()
+ });
+ message.textContent=side+' demo position opened. Amount: $'+fmt(amount);
+ tab='positions';update();
 }
-function closePosition(id){
- let i=positions.findIndex(p=>p.id===id);
- if(i<0)return;
- let p=positions[i],exit=prices[p.symbol];
- let pnl=(p.side==="BUY"?exit-p.entry:p.entry-exit)/p.entry*p.amount;
- balance+=p.amount+pnl;
- let h=history.find(x=>x.id===id);
- if(h){h.exit=exit;h.pnl=pnl;h.status="CLOSED";}
- positions.splice(i,1);
- document.getElementById("balance").textContent=money(balance);
- render();
+function closeTrade(id){
+ const index=positions.findIndex(p=>p.id===id);
+ if(index<0)return;
+ const p=positions[index];
+ const movement=(price-p.entry)/p.entry;
+ const direction=p.side==='BUY'?1:-1;
+ const pnl=p.amount*movement*direction*100;
+ const profit=Math.max(-p.amount,pnl);
+ balance+=p.amount+profit;
+ history.unshift({...p,exit:price,pnl:profit,closed:new Date().toLocaleTimeString()});
+ positions.splice(index,1);
+ update();
 }
-function showTab(tab){
- currentTab=tab;
- document.getElementById("positionsTab").classList.toggle("active",tab==="positions");
- document.getElementById("historyTab").classList.toggle("active",tab==="history");
- render();
-}
-function render(){
- let list=document.getElementById("tradeList");
- let arr=currentTab==="positions"?positions:history;
- if(!arr.length){
-  list.innerHTML='<div class="note">Nothing to show yet.</div>';return;
+function renderList(){
+ const list=document.getElementById('list');
+ const items=tab==='positions'?positions:history;
+ if(!items.length){
+  list.innerHTML='<div class="muted" style="padding:12px 0">'+
+  (tab==='positions'?'No open positions yet.':'No closed trades yet.')+'</div>';return;
  }
- list.innerHTML=arr.map(p=>{
-  let pnl=p.pnl||0;
-  return '<div class="item"><div><b>'+p.side+' · '+p.symbol+'</b><br><span class="small">'+p.time+' · '+money(p.amount)+'</span>'+
-  (currentTab==="history"?'<br><span class="'+(pnl>=0?'green':'red')+'">'+p.status+(p.status==="CLOSED"?' · '+money(pnl):'')+'</span>':'')+
-  '</div><div style="text-align:right">'+
-  (currentTab==="positions"?'<button onclick="closePosition('+p.id+')" style="padding:7px">Close</button>':'<span class="small">'+(p.exit===null?'Open':'Exit '+fmt(p.exit))+'</span>')+
-  '</div></div>';
- }).join("");
+ list.innerHTML=items.map(p=>{
+  if(tab==='positions'){
+   return '<div class="item"><div class="row"><strong>'+p.side+' · '+p.symbol+
+   '</strong><strong>$'+fmt(p.amount)+'</strong></div><div class="muted">Entry: '+
+   p.entry.toFixed(decimals())+' · '+p.opened+'</div><button style="margin-top:8px" onclick="closeTrade('+p.id+')">Close position</button></div>';
+  }
+  return '<div class="item"><div class="row"><strong>'+p.side+' · '+p.symbol+
+  '</strong><strong class="'+(p.pnl>=0?'green':'red')+'">'+(p.pnl>=0?'+':'')+
+  '$'+fmt(p.pnl)+'</strong></div><div class="muted">Entry: '+p.entry.toFixed(decimals())+
+  ' · Exit: '+p.exit.toFixed(decimals())+' · '+p.closed+'</div></div>';
+ }).join('');
 }
-document.getElementById("symbol").addEventListener("change",()=>{
- makeCandles();updatePrice();
-});
-document.getElementById("period").addEventListener("change",()=>{
- makeCandles();draw();
-});
-window.addEventListener("resize",draw);
-makeCandles();updatePrice();
-setInterval(updatePrice,1500);
+function showTab(t){tab=t;renderList();}
+function resetDemo(){
+ if(!confirm('Reset demo balance to $1,000 and clear all trades?'))return;
+ balance=1000;positions=[];history=[];seq=0;update();
+ document.getElementById('message').textContent='Demo account reset.';
+}
+function tick(){
+ let old=price;
+ price+=((Math.random()-.5)*price*.00035);
+ if(!candles.length)makeCandles();
+ let c=candles[candles.length-1];
+ c.close=price;c.high=Math.max(c.high,price);c.low=Math.min(c.low,price);
+ update();draw();
+}
+window.addEventListener('resize',draw);
+makeCandles();update();draw();
+setInterval(tick,2500);
 </script>
 </body>
-     </html>
-  
+</html>
